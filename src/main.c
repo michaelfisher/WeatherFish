@@ -7,8 +7,6 @@
 #define KEY_TEMPHIGH 4
 #define KEY_FORECAST 5
 #define KEY_LASTUPDATE 6
-
-static bool appStarted = false;
   
 static Window *s_main_window;
 static TextLayer *s_date_layer;
@@ -225,6 +223,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
   
   // Get weather update every time the minute is divisible evenly by 30 (e.g. top and bottom of the hour)
+  // It will still update anytime the watch face is loaded
   if(tick_time->tm_min % 30 == 0) {
     // Begin dictionary
     DictionaryIterator *iter;

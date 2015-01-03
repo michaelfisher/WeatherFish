@@ -70,11 +70,30 @@ function getWeatherFromWOEID(woeid, location) {
       // Do this if forecast query succeeds
       if (json) {
         // Weather
+        var texttoreplace = {
+          Heavy:"Hvy",
+          Freezing:"Frz",
+          Isolated:"Iso",
+          Light:"Lt",
+          Mostly:"Mstly",
+          Partly:"Ptly",
+          Scattered:"Scatt",
+          Severe:"Sev",
+          Thunderstorms:"Tstorms"
+        };
+        var repstring = new RegExp(Object.keys(texttoreplace).join("|"),"gi");
+        
         var temperature = json.query.results.channel[0].item.condition.temp;
-        var conditions = json.query.results.channel[0].item.condition.text;
+        var conditionstext = json.query.results.channel[0].item.condition.text;
+        var conditions = conditionstext.replace(repstring, function(matched) {
+          return texttoreplace[matched];
+        });
         var templow = json.query.results.channel[0].item.forecast.low;
         var temphigh = json.query.results.channel[0].item.forecast.high;
-        var forecast = json.query.results.channel[0].item.forecast.text;
+        var forecasttext = json.query.results.channel[0].item.forecast.text;
+        var forecast = forecasttext.replace(repstring, function(matched) {
+          return texttoreplace[matched];
+        });
         var timestamp = new Date();
         var hours = "0" + timestamp.getHours();
         var minutes = "0" + timestamp.getMinutes();
@@ -85,8 +104,8 @@ function getWeatherFromWOEID(woeid, location) {
         console.log("Current Temp: " + temperature);
         console.log("Low Temp: " + templow);
         console.log("High Temp: " + temphigh);
-        console.log("Conditions: " + conditions);
-        console.log("Forecast: " + forecast);
+        console.log("Conditions: " + conditionstext);
+        console.log("Forecast: " + forecasttext);
         console.log("Last update: " + timestamp);
       
         // Assemble dictionary using our keys
@@ -156,21 +175,6 @@ function getWeather() {
     {timeout: 15000, maximumAge: 60000}
   );
 }
-
-// Setup configuration page
-Pebble.addEventListener('showConfiguration', function(e) {
-  // Show config page
-  Pebble.openURL('https://michaelfisher.github.io/WeatherFish/settings.html');
-});
-
-// Listen for setting page close
-Pebble.addEventListener('webviewclosed',
-  function(e) {
-    var configuration = JSON.parse(decodeURIComponent(e.response));
-    console.log('Configuration window returned: ', JSON.stringify(configuration));
-  }
-);
-
 
 // Listen for when an AppMessage is received
 Pebble.addEventListener('appmessage',
