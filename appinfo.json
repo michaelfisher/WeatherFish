@@ -1,0 +1,35 @@
+{
+    "appKeys": {
+        "KEY_CONDITIONS": 2,
+        "KEY_FORECAST": 5,
+        "KEY_LASTUPDATE": 6,
+        "KEY_LOCATION": 0,
+        "KEY_TEMPERATURE": 1,
+        "KEY_TEMPHIGH": 4,
+        "KEY_TEMPLOW": 3
+    },
+    "capabilities": [
+        "location",
+        "configurable"
+    ],
+    "companyName": "Michael Fisher",
+    "longName": "WeatherFish",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "characterRegex": "[0-9:]",
+                "file": "fonts/repetition-scrolling.ttf",
+                "name": "FONT_REPETITION_SCROLLING_50",
+                "type": "font"
+            }
+        ]
+    },
+    "shortName": "WeatherFish",
+    "uuid": "5765ce01-5b86-421a-9610-d480f93ff8b2",
+    "versionCode": 1,
+    "versionLabel": "1.1",
+    "watchapp": {
+        "watchface": true
+    }
+}
