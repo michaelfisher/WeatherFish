@@ -7,7 +7,7 @@ var xhrRequest = function (url, type, callback) {
   xhr.send();
 };
 
-function getLocation(latitude, longitude) {
+function getLocationFromCoords(latitude, longitude) {
   // Construct Location URL
   var locquery = encodeURI("select woeid, latitude, longitude, countrycode, statecode, city, street from geo.placefinder where text=\"" + latitude + "," + longitude +"\" and gflags=\"R\"");
   var locurl = "http://query.yahooapis.com/v1/public/yql?q=" + locquery + "&format=json"; 
@@ -35,7 +35,7 @@ function getLocation(latitude, longitude) {
       }
       else {
         // Do this if placefinder query fails
-        var location = "Unable to get location from coordinates!";
+        var location = "Unable to locate!";
         
         var dictionary = {
           "KEY_LOCATION": location
@@ -70,16 +70,16 @@ function getWeatherFromWOEID(woeid, location) {
       // Do this if forecast query succeeds
       if (json) {
         // Weather
+        // Text to replace in returned conditions for the sake of screen space
         var texttoreplace = {
-          Heavy:"Hvy",
-          Freezing:"Frz",
-          Isolated:"Iso",
-          Light:"Lt",
-          Mostly:"Mstly",
-          Partly:"Ptly",
-          Scattered:"Scatt",
-          Severe:"Sev",
-          Thunderstorms:"Tstorms"
+          "Heavy":"Hvy",
+          "Freezing":"Frz",
+          "Isolated":"Iso",
+          "Light":"Lt",
+          "Scattered":"Scatt",
+          "Severe":"Sev",
+          "Snow Showers Early":"Snow Shwrs Early",
+          "Thunderstorms":"Tstorms"
         };
         var repstring = new RegExp(Object.keys(texttoreplace).join("|"),"gi");
         
@@ -113,8 +113,8 @@ function getWeatherFromWOEID(woeid, location) {
           "KEY_LOCATION": location,
           "KEY_TEMPERATURE": temperature + "\u00B0",
           "KEY_CONDITIONS": conditions,
-          "KEY_TEMPLOW": templow,
-          "KEY_TEMPHIGH": temphigh,
+          "KEY_TEMPLOW": templow + "\nL",
+          "KEY_TEMPHIGH": temphigh + "\nH",
           "KEY_FORECAST": forecast,
           "KEY_LASTUPDATE": lastupdate
         };
@@ -147,32 +147,23 @@ function locationError(err) {
     function(e) {
       console.log("Error sending message info to Pebble!");
     }
-  );
-      
-  // Send notification to Pebble
-  Pebble.showSimpleNotificationOnPebble("WeatherFish", "Unable to get location. Check connectivity.");
-  
+  );    
   console.log("Unable to locate before timeout!");
 }
 
 function locationSuccess(pos) {
-  getLocation(pos.coords.latitude, pos.coords.longitude);
-  console.log("Coordinates: " + pos.coords.latitude + ", " + pos.coords.longitude);
+  getLocationFromCoords(pos.coords.latitude, pos.coords.longitude);
+  console.log("Coordinates: " + pos.coords.latitude + ", " + pos.coords.longitude + " (" + pos.coords.accuracy + "m accuracy)");
 }
 
 function getWeather() {
-  // Assemble dictionary using our keys
-  var dictionary = {
-    "KEY_LOCATION": "Locating..."
-  };
-
-  // Send to Pebble
-  Pebble.sendAppMessage(dictionary);
+  console.log("Getting location...");
   
+  // Get location from phone
   navigator.geolocation.getCurrentPosition(
     locationSuccess,
     locationError,
-    {timeout: 15000, maximumAge: 60000}
+    {enableHighAccuracy: true, timeout: 15000, maximumAge: 15000}
   );
 }
 
@@ -187,7 +178,6 @@ Pebble.addEventListener('appmessage',
 // Listen for when the watchface is opened
 Pebble.addEventListener('ready', 
   function(e) {
-    console.log("PebbleKit JS ready!");
     getWeather();
   }
 );

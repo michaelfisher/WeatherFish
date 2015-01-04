@@ -3,8 +3,8 @@
 #define KEY_LOCATION 0  
 #define KEY_TEMPERATURE 1
 #define KEY_CONDITIONS 2
-#define KEY_TEMPLOW 3
-#define KEY_TEMPHIGH 4
+#define KEY_TEMPLOW 3 
+#define KEY_TEMPHIGH 4  
 #define KEY_FORECAST 5
 #define KEY_LASTUPDATE 6
   
@@ -122,11 +122,11 @@ static void main_window_load(Window *window) {
   // Add temperature layer as a child layer to the Window's root layer
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_temperature_layer));
   
-  // Create templow layer
-  s_templow_layer = text_layer_create(GRect(0, 80, 30, 20));
-  
   // Create temphighlow font
-  s_temphighlow_font = fonts_get_system_font(FONT_KEY_GOTHIC_18);
+  s_temphighlow_font = fonts_get_system_font(FONT_KEY_GOTHIC_14);
+  
+  // Create templow layer
+  s_templow_layer = text_layer_create(GRect(0, 79, 30, 36));
 
   // Apply to templow layer
   text_layer_set_background_color(s_templow_layer, GColorClear);
@@ -139,7 +139,7 @@ static void main_window_load(Window *window) {
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_templow_layer));
   
   // Create temphigh layer
-  s_temphigh_layer = text_layer_create(GRect(114, 80, 30, 20));
+  s_temphigh_layer = text_layer_create(GRect(114, 79, 30, 36));
 
   // Apply to temphigh layer
   text_layer_set_background_color(s_temphigh_layer, GColorClear);
@@ -270,12 +270,12 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     case KEY_CONDITIONS:
       snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", t->value->cstring);
       break;
-      case KEY_TEMPLOW:
+    case KEY_TEMPLOW:
       snprintf(templow_buffer, sizeof(templow_buffer), "%s", t->value->cstring);
       break;
     case KEY_TEMPHIGH:
       snprintf(temphigh_buffer, sizeof(temphigh_buffer), "%s", t->value->cstring);
-      break;
+      break; 
     case KEY_FORECAST:
       snprintf(forecast_buffer, sizeof(conditions_buffer), "%s", t->value->cstring);
       break;

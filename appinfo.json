@@ -9,8 +9,7 @@
         "KEY_TEMPLOW": 3
     },
     "capabilities": [
-        "location",
-        "configurable"
+        "location"
     ],
     "companyName": "Michael Fisher",
     "longName": "WeatherFish",
