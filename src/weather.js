@@ -23,35 +23,41 @@ function getLocationFromCoords(latitude, longitude) {
         // Location
         var countrycode = json.query.results.Result.countrycode;
         var statecode = json.query.results.Result.statecode;
-        if (statecode != null) {
-          var location = json.query.results.Result.city + ", " + json.query.results.Result.statecode;
-        } else {
-          var location = json.query.results.Result.city + ", " + json.query.results.Result.countrycode;
+        var city = json.query.results.Result.city;
+        if (statecode !== null) {
+          var region = statecode;
+          region = statecode;
         }
-        var woeid = json.query.results.Result.woeid;
-      
-        // Weather
+        else {
+          var region = countrycode;
+          region = countrycode;
+        }
+        var woeid = json.query.results.Result.woeid; 
+        var location = city + ", " + region;
+        
+        console.log("Location: " + location);
+        console.log("WOEID: " + woeid);
+        
+        // Get the weather
         getWeatherFromWOEID(woeid, location);
       }
       else {
         // Do this if placefinder query fails
-        var location = "Unable to locate!";
-        
+        // Assemble dictionary using our keys
         var dictionary = {
-          "KEY_LOCATION": location
+          "KEY_LOCATION": "Location Unknown",
+          "KEY_CONDITIONS": "Weather Unknown"
         };
-        
+
         // Send to Pebble
         Pebble.sendAppMessage(dictionary,
           function(e) {
-            console.log("Location info sent to Pebble successfully!");
+            console.log("Weather and location info sent to Pebble successfully!");
           },
           function(e) {
-            console.log("Error sending location info to Pebble!");
+            console.log("Error sending weather and location info to Pebble!");
           }
         );
-        
-        console.log("Unable to get location from coordinates!");
       }
     }      
   );
@@ -59,7 +65,7 @@ function getLocationFromCoords(latitude, longitude) {
 
 function getWeatherFromWOEID(woeid, location) {
   var wxquery = encodeURI("select  item.condition, item.forecast from weather.forecast where woeid = " + woeid);
-	var wxurl = "http://query.yahooapis.com/v1/public/yql?q=" + wxquery + "&format=json";
+  var wxurl = "http://query.yahooapis.com/v1/public/yql?q=" + wxquery + "&format=json";
   
   // Send request to Yahoo!
   xhrRequest(wxurl, 'GET', 
@@ -99,22 +105,20 @@ function getWeatherFromWOEID(woeid, location) {
         var minutes = "0" + timestamp.getMinutes();
         var lastupdate = hours.substr(hours.length-2) + ":" + minutes.substr(minutes.length-2);
       
-        console.log("Location: " + location);
-        console.log("WOEID: " + woeid);
         console.log("Current Temp: " + temperature);
         console.log("Low Temp: " + templow);
         console.log("High Temp: " + temphigh);
-        console.log("Conditions: " + conditionstext);
-        console.log("Forecast: " + forecasttext);
+        console.log("Conditions: " + conditions);
+        console.log("Forecast: " + forecast);
         console.log("Last update: " + timestamp);
-      
+        
         // Assemble dictionary using our keys
         var dictionary = {
           "KEY_LOCATION": location,
           "KEY_TEMPERATURE": temperature + "\u00B0",
+          "KEY_TEMPLOW": templow + "\n" + "L",
+          "KEY_TEMPHIGH": temphigh + "\n" + "H",
           "KEY_CONDITIONS": conditions,
-          "KEY_TEMPLOW": templow + "\nL",
-          "KEY_TEMPHIGH": temphigh + "\nH",
           "KEY_FORECAST": forecast,
           "KEY_LASTUPDATE": lastupdate
         };
@@ -129,6 +133,9 @@ function getWeatherFromWOEID(woeid, location) {
           }
         );
       }
+      else {
+        // Do this if forecast query fails
+      }
     }      
   );
 }
@@ -136,48 +143,61 @@ function getWeatherFromWOEID(woeid, location) {
 function locationError(err) {
   // Assemble dictionary using our keys
   var dictionary = {
-    "KEY_LOCATION": "Unable to locate!"
+    "KEY_LOCATION": "Unable to Locate",
+    "KEY_CONDITIONS": "Weather Unknown"
   };
 
   // Send to Pebble
   Pebble.sendAppMessage(dictionary,
     function(e) {
-      console.log("Message info sent to Pebble successfully!");
+      console.log("Weather and location info sent to Pebble successfully!");
     },
     function(e) {
-      console.log("Error sending message info to Pebble!");
+      console.log("Error sending weather and location info to Pebble!");
     }
-  );    
-  console.log("Unable to locate before timeout!");
+  );
+  
+  Pebble.showSimpleNotificationOnPebble("WeatherFish", "Unable to get location coordinates from phone! Check connectivity.");
 }
 
 function locationSuccess(pos) {
   getLocationFromCoords(pos.coords.latitude, pos.coords.longitude);
-  console.log("Coordinates: " + pos.coords.latitude + ", " + pos.coords.longitude + " (" + pos.coords.accuracy + "m accuracy)");
+  var coords = pos.coords;
+  var latcoord = coords.latitude;
+  var loncoord = coords.longitude;
+  var accuracy = coords.accuracy;
+  
+  console.log("Coordinates: " + latcoord + ", " + loncoord + " (" + accuracy.toFixed(0) + "m accuracy)");
 }
 
 function getWeather() {
-  console.log("Getting location...");
-  
   // Get location from phone
   navigator.geolocation.getCurrentPosition(
     locationSuccess,
     locationError,
     {enableHighAccuracy: true, timeout: 15000, maximumAge: 15000}
   );
+  console.log("Getting location...");
 }
-
-// Listen for when an AppMessage is received
-Pebble.addEventListener('appmessage',
-  function(e) {
-    console.log("AppMessage received!");
-    getWeather();
-  }                     
-);
 
 // Listen for when the watchface is opened
 Pebble.addEventListener('ready', 
   function(e) {
     getWeather();
   }
+);
+
+// Listen for when an AppMessage is received
+Pebble.addEventListener('appmessage',
+  function(e) {
+    var response = JSON.stringify(e.payload);
+    if (response.search("Update requested.") != -1) {
+      console.log("Update requested!");
+      
+      getWeather();
+    }
+    else {
+      console.log("AppMessage received! " + response);
+    }
+  }                     
 );

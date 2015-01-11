@@ -1,12 +1,13 @@
 {
     "appKeys": {
-        "KEY_CONDITIONS": 2,
-        "KEY_FORECAST": 5,
-        "KEY_LASTUPDATE": 6,
-        "KEY_LOCATION": 0,
-        "KEY_TEMPERATURE": 1,
-        "KEY_TEMPHIGH": 4,
-        "KEY_TEMPLOW": 3
+        "KEY_CONDITIONS": 3,
+        "KEY_FORECAST": 6,
+        "KEY_LASTUPDATE": 7,
+        "KEY_LOCATION": 1,
+        "KEY_TEMPERATURE": 2,
+        "KEY_TEMPHIGH": 5,
+        "KEY_TEMPLOW": 4,
+        "KEY_UPDATEREQ": 0
     },
     "capabilities": [
         "location"
@@ -27,7 +28,7 @@
     "shortName": "WeatherFish",
     "uuid": "5765ce01-5b86-421a-9610-d480f93ff8b2",
     "versionCode": 1,
-    "versionLabel": "1.1",
+    "versionLabel": "1.3",
     "watchapp": {
         "watchface": true
     }

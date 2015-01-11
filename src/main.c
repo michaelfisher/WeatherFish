@@ -1,12 +1,13 @@
 #include <pebble.h>
   
-#define KEY_LOCATION 0  
-#define KEY_TEMPERATURE 1
-#define KEY_CONDITIONS 2
-#define KEY_TEMPLOW 3 
-#define KEY_TEMPHIGH 4  
-#define KEY_FORECAST 5
-#define KEY_LASTUPDATE 6
+#define KEY_UPDATEREQ 0
+#define KEY_LOCATION 1  
+#define KEY_TEMPERATURE 2
+#define KEY_CONDITIONS 3
+#define KEY_TEMPLOW 4 
+#define KEY_TEMPHIGH 5  
+#define KEY_FORECAST 6
+#define KEY_LASTUPDATE 7
   
 static Window *s_main_window;
 static TextLayer *s_date_layer;
@@ -230,7 +231,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     app_message_outbox_begin(&iter);
 
     // Add a key-value pair
-    dict_write_uint8(iter, 0, 0);
+    dict_write_cstring(iter, 0, "Update requested.");
 
     // Send the message!
     app_message_outbox_send();
@@ -251,8 +252,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   static char forecast_buffer[32];
   static char location_layer_buffer[48];
   static char location_buffer[48];
-  static char lastupdate_layer_buffer[16];
-  static char lastupdate_buffer[16];
+  static char lastupdate_layer_buffer[10];
+  static char lastupdate_buffer[10];
   
   // Read first item
   Tuple *t = dict_read_first(iterator);
