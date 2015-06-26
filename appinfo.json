@@ -5,8 +5,11 @@
         "KEY_LASTUPDATE": 7,
         "KEY_LOCATION": 1,
         "KEY_TEMPERATURE": 2,
+        "KEY_TEMPERATURE_C": 8,
         "KEY_TEMPHIGH": 5,
+        "KEY_TEMPHIGH_C": 10,
         "KEY_TEMPLOW": 4,
+        "KEY_TEMPLOW_C": 9,
         "KEY_UPDATEREQ": 0
     },
     "capabilities": [
@@ -18,17 +21,20 @@
     "resources": {
         "media": [
             {
-                "characterRegex": "[0-9:]",
-                "file": "fonts/repetition-scrolling.ttf",
-                "name": "FONT_REPETITION_SCROLLING_50",
+                "file": "fonts/ionicons.ttf",
+                "name": "FONT_IONICONS_16",
                 "type": "font"
             }
         ]
     },
+    "sdkVersion": "3",
     "shortName": "WeatherFish",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
     "uuid": "5765ce01-5b86-421a-9610-d480f93ff8b2",
-    "versionCode": 1,
-    "versionLabel": "1.3",
+    "versionLabel": "2.1",
     "watchapp": {
         "watchface": true
     }
