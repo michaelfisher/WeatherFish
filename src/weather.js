@@ -32,7 +32,7 @@ function getLocationFromCoords(latitude, longitude) {
           var region = countrycode;
           region = countrycode;
         }
-        var woeid = json.query.results.Result.woeid; 
+        var woeid = json.query.results.Result.woeid;
         var location = city + ", " + region;
         
         console.log("Location: " + location);
@@ -64,9 +64,16 @@ function getLocationFromCoords(latitude, longitude) {
 }
 
 function getWeatherFromWOEID(woeid, location) {
-  var wxquery = encodeURI("select  item.condition, item.forecast from weather.forecast where woeid = " + woeid);
-  //var wxquery = encodeURI("select  item.condition, item.forecast from weather.forecast where woeid = " + woeid + " and u='c'");
+  var tempunit = localStorage.getItem(8);
+  if (tempunit !== null) {
+    var wxquery = encodeURI("select  item.condition, item.forecast from weather.forecast where woeid = " + woeid + " and u='" + tempunit + "'");
+  }
+  else {
+    var wxquery = encodeURI("select  item.condition, item.forecast from weather.forecast where woeid = " + woeid);
+  }
+  
   var wxurl = "http://query.yahooapis.com/v1/public/yql?q=" + wxquery + "&format=json";
+
   
   // Send request to Yahoo!
   xhrRequest(wxurl, 'GET', 
@@ -92,15 +99,12 @@ function getWeatherFromWOEID(woeid, location) {
         var repstring = new RegExp(Object.keys(texttoreplace).join("|"),"gi");
         
         var temperature = json.query.results.channel[0].item.condition.temp;
-        var temperature_c = Math.round((temperature - 32) * (5/9));
         var conditionstext = json.query.results.channel[0].item.condition.text;
         var conditions = conditionstext.replace(repstring, function(matched) {
           return texttoreplace[matched];
         });
         var templow = json.query.results.channel[0].item.forecast.low;
-        var templow_c = Math.round((templow - 32) * (5/9));
         var temphigh = json.query.results.channel[0].item.forecast.high;
-        var temphigh_c = Math.round((temphigh - 32) * (5/9));
         var forecasttext = json.query.results.channel[0].item.forecast.text;
         var forecast = forecasttext.replace(repstring, function(matched) {
           return texttoreplace[matched];
@@ -111,11 +115,8 @@ function getWeatherFromWOEID(woeid, location) {
         var lastupdate = hours.substr(hours.length-2) + ":" + minutes.substr(minutes.length-2);
       
         console.log("Current Temp: " + temperature);
-        console.log("Current Temp (C): " + temperature_c);
         console.log("Low Temp: " + templow);
-        console.log("Low Temp (C): " + templow_c);
         console.log("High Temp: " + temphigh);
-        console.log("High Temp (C): " + temphigh_c);
         console.log("Conditions: " + conditions);
         //console.log("Forecast: " + forecast);
         console.log("Last update: " + timestamp);
@@ -124,11 +125,8 @@ function getWeatherFromWOEID(woeid, location) {
         var dictionary = {
           "KEY_LOCATION": location,
           "KEY_TEMPERATURE": temperature + "\u00B0",
-          "KEY_TEMPERATURE_C": temperature_c + "\u00B0",
           "KEY_TEMPLOW": templow,
-          "KEY_TEMPLOW_C": templow_c,
           "KEY_TEMPHIGH": temphigh,
-          "KEY_TEMPHIGH_C": temphigh_c,
           "KEY_CONDITIONS": conditions,
           //"KEY_FORECAST": forecast, // Maybe I don't want the forecast text included.
           "KEY_LASTUPDATE": lastupdate
@@ -154,7 +152,7 @@ function getWeatherFromWOEID(woeid, location) {
 function locationError(err) {
   // Assemble dictionary using our keys
   var dictionary = {
-    "KEY_LOCATION": "Unable to Locate",
+    "KEY_LOCATION": "Location Unknown",
     "KEY_CONDITIONS": "Weather Unknown"
   };
 
@@ -186,7 +184,7 @@ function getWeather() {
   navigator.geolocation.getCurrentPosition(
     locationSuccess,
     locationError,
-    {enableHighAccuracy: true, timeout: 15000, maximumAge: 15000}
+    {timeout: 15000, maximumAge: 0}
   );
   console.log("Getting location...");
 }
@@ -198,22 +196,21 @@ Pebble.addEventListener('ready',
   }
 );
 
-//Pebble.addEventListener('showConfiguration', function(e) {
-//Show config page
-  //Pebble.openURL('http://michaelfisher.github.io/WeatherFish/settings.html');
-//});
+// Listen for the configuration page to open
+Pebble.addEventListener("showConfiguration", function() {
+  console.log("Showing Configuration...");
+  Pebble.openURL('https://s3.amazonaws.com/michael.fisher/WeatherFish/settings.html?tempunit=' + localStorage.getItem(8));
+  console.log('https://s3.amazonaws.com/michael.fisher/WeatherFish/settings.html?tempunit=' + localStorage.getItem(8));
+});
 
-
-//Pebble.addEventListener("webviewclosed", function(e) {
-    //console.log("Configuration closed.");
-    //if (e.response !== '') {
-      //var configuration = JSON.parse(decodeURIComponent(e.response));
-      //console.log('Configuration window returned: ', JSON.stringify(configuration));
-    //}
-    //else {
-      //console.log("No options received.");
-    //}
-//});
+// Listen for the configuration page to close
+Pebble.addEventListener("webviewclosed", function(e) {
+  var options = JSON.parse(decodeURIComponent(e.response));
+  console.log("Configuration closed.");
+  localStorage.setItem(8, (options.KEY_TEMPUNIT));
+  
+  getWeather();
+});
 
 // Listen for when an AppMessage is received
 Pebble.addEventListener('appmessage',

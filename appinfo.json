@@ -5,15 +5,14 @@
         "KEY_LASTUPDATE": 7,
         "KEY_LOCATION": 1,
         "KEY_TEMPERATURE": 2,
-        "KEY_TEMPERATURE_C": 8,
         "KEY_TEMPHIGH": 5,
-        "KEY_TEMPHIGH_C": 10,
         "KEY_TEMPLOW": 4,
-        "KEY_TEMPLOW_C": 9,
+        "KEY_TEMPUNIT": 8,
         "KEY_UPDATEREQ": 0
     },
     "capabilities": [
-        "location"
+        "location",
+        "configurable"
     ],
     "companyName": "Michael Fisher",
     "longName": "WeatherFish",
@@ -34,7 +33,7 @@
         "basalt"
     ],
     "uuid": "5765ce01-5b86-421a-9610-d480f93ff8b2",
-    "versionLabel": "2.1",
+    "versionLabel": "2.3",
     "watchapp": {
         "watchface": true
     }

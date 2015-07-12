@@ -9,9 +9,7 @@
 #define KEY_TEMPHIGH 5  
 #define KEY_FORECAST 6
 #define KEY_LASTUPDATE 7
-#define KEY_TEMPERATURE_C 8
-#define KEY_TEMPLOW_C 9
-#define KEY_TEMPHIGH_C 10
+#define KEY_TEMPUNIT 8
 
 bool bt_connection = true;
   
@@ -62,10 +60,6 @@ static void update_time() {
   } else {
     // Use 12 hour format
     strftime(time_buffer, sizeof(time_buffer), "%I:%M", tick_time);
-    // Strip the zero-padding from the 12 hour time
-    if (time_buffer[0] == '0') {
-    	memmove(time_buffer, &time_buffer[1], sizeof(time_buffer) - 1);
-    }
     strftime(ampm_buffer, sizeof(ampm_buffer), "%p", tick_time);
   }
   
@@ -73,7 +67,12 @@ static void update_time() {
   text_layer_set_text(s_date_layer, date_buffer);
 
   // Display the time on the time layer
-  text_layer_set_text(s_time_layer, time_buffer);
+  if(clock_is_24h_style() == true) {
+    text_layer_set_text(s_time_layer, time_buffer);
+  } else {
+    // Strip the leading zero from 12-hour times
+    text_layer_set_text(s_time_layer,time_buffer+(('0' == time_buffer[0])?1:0));
+  }
   
   // Display the AM/PM on the AM/PM layer
   text_layer_set_text(s_ampm_layer, ampm_buffer);
@@ -461,6 +460,9 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     case KEY_LASTUPDATE:
       snprintf(lastupdate_buffer, sizeof(lastupdate_buffer), "%s", t->value->cstring);
       break;
+    //case KEY_TEMPUNIT:
+      //persist_write_string(KEY_TEMPUNIT, t->value->cstring);
+      //break;
     default:
       APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
       break;
