@@ -1,0 +1,45 @@
+{
+    "author": "Michael Fisher",
+    "dependencies": {},
+    "keywords": [],
+    "name": "weatherfish",
+    "pebble": {
+        "capabilities": [
+            "location",
+            "configurable"
+        ],
+        "displayName": "WeatherFish",
+        "enableMultiJS": false,
+        "messageKeys": {
+            "KEY_CONDITIONS": 3,
+            "KEY_FORECAST": 6,
+            "KEY_LASTUPDATE": 7,
+            "KEY_LOCATION": 1,
+            "KEY_TEMPERATURE": 2,
+            "KEY_TEMPHIGH": 5,
+            "KEY_TEMPLOW": 4,
+            "KEY_TEMPUNIT": 8,
+            "KEY_UPDATEREQ": 0
+        },
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "fonts/ionicons.ttf",
+                    "name": "FONT_IONICONS_16",
+                    "type": "font"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt"
+        ],
+        "uuid": "5765ce01-5b86-421a-9610-d480f93ff8b2",
+        "watchapp": {
+            "watchface": true
+        }
+    },
+    "version": "2.3.0"
+}

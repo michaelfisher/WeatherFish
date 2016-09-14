@@ -24,40 +24,26 @@ function getLocationFromCoords(latitude, longitude) {
         var countrycode = json.query.results.Result.countrycode;
         var statecode = json.query.results.Result.statecode;
         var city = json.query.results.Result.city;
+        var street = json.query.results.Result.street;
         if (statecode !== null) {
           var region = statecode;
-          region = statecode;
         }
         else {
           var region = countrycode;
-          region = countrycode;
         }
-        var woeid = json.query.results.Result.woeid;
+        //var location = city + ", " + region;
         var location = city + ", " + region;
         
-        console.log("Location: " + location);
-        console.log("WOEID: " + woeid);
+        var woeid = json.query.results.Result.woeid;
         
+        console.log("Location: " + street + " (" + location + ")");
+        console.log("WOEID: " + woeid);
+            
         // Get the weather
         getWeatherFromWOEID(woeid, location);
       }
       else {
         // Do this if placefinder query fails
-        // Assemble dictionary using our keys
-        var dictionary = {
-          "KEY_LOCATION": "Location Unknown",
-          "KEY_CONDITIONS": "Weather Unknown"
-        };
-
-        // Send to Pebble
-        Pebble.sendAppMessage(dictionary,
-          function(e) {
-            console.log("Weather and location info sent to Pebble successfully!");
-          },
-          function(e) {
-            console.log("Error sending weather and location info to Pebble!");
-          }
-        );
       }
     }      
   );
@@ -119,7 +105,7 @@ function getWeatherFromWOEID(woeid, location) {
         console.log("High Temp: " + temphigh);
         console.log("Conditions: " + conditions);
         //console.log("Forecast: " + forecast);
-        console.log("Last update: " + timestamp);
+        console.log("Weather updated: " + timestamp);
         
         // Assemble dictionary using our keys
         var dictionary = {
@@ -135,10 +121,10 @@ function getWeatherFromWOEID(woeid, location) {
         // Send to Pebble
         Pebble.sendAppMessage(dictionary,
           function(e) {
-            console.log("Weather and location info sent to Pebble successfully!");
+            console.log("Info sent to Pebble successfully!");
           },
           function(e) {
-            console.log("Error sending weather and location info to Pebble!");
+            console.log("Error sending info to Pebble!");
           }
         );
       }
@@ -149,7 +135,7 @@ function getWeatherFromWOEID(woeid, location) {
   );
 }
 
-function locationError(err) {
+function locationError(err) {  
   // Assemble dictionary using our keys
   var dictionary = {
     "KEY_LOCATION": "Location Unknown",
@@ -169,14 +155,11 @@ function locationError(err) {
   Pebble.showSimpleNotificationOnPebble("WeatherFish", "Unable to get location coordinates from phone! Check connectivity.");
 }
 
-function locationSuccess(pos) {
+function locationSuccess(pos) {  
   getLocationFromCoords(pos.coords.latitude, pos.coords.longitude);
-  var coords = pos.coords;
-  var latcoord = coords.latitude;
-  var loncoord = coords.longitude;
-  var accuracy = coords.accuracy;
-  
-  console.log("Coordinates: " + latcoord + ", " + loncoord + " (" + accuracy.toFixed(0) + "m accuracy)");
+  var positiontimestamp = new Date(pos.timestamp);
+  console.log("Position: " + pos.coords.latitude + ", " + pos.coords.longitude + " (" + pos.coords.accuracy.toFixed(0) + "m accuracy) ");
+  console.log("Position updated: " + positiontimestamp.toLocaleString());
 }
 
 function getWeather() {
@@ -184,9 +167,9 @@ function getWeather() {
   navigator.geolocation.getCurrentPosition(
     locationSuccess,
     locationError,
-    {timeout: 15000, maximumAge: 0}
+    {enableHighAccuracy: false, timeout: 15000, maximumAge: 10000}
   );
-  console.log("Getting location...");
+  console.log("Getting position...");
 }
 
 // Listen for when the watchface is opened
